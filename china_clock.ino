@@ -11,7 +11,7 @@ using ace_segment::kActiveLowPattern;
 const uint8_t NUM_DIGITS = 10;
 const uint8_t NUM_SEGMENTS = 8;
 const uint8_t DIGIT_PINS[NUM_DIGITS] = {3, 5, 6, 9};
-const uint8_t SEGMENT_PINS[NUM_SEGMENTS] = {0, 1, 2, 4, 7, 8, 12, 13};
+const uint8_t SEGMENT_PINS[NUM_SEGMENTS] = {A0, A1, A2, A3, A4, A5, 12, 13};
 
 // Total fields/second
 //    = FRAMES_PER_SECOND * NUM_SUBFIELDS * NUM_DIGITS
@@ -29,17 +29,30 @@ DirectModule<NUM_DIGITS, NUM_SUBFIELDS> ledModule(
     DIGIT_PINS);
 
 const uint8_t PATTERNS[NUM_DIGITS] = {
-  0b00111111, // 0 -> Segments: A, B, C, D, E, F
-  0b00000110, // 1 -> Segments: B, C
-  0b01011011, // 2 -> Segments: A, B, D, E, G
-  0b01001111, // 3 -> Segments: A, B, C, D, G
-  0b01100110, // 4 -> Segments: B, C, F, G
-  0b01101101, // 5 -> Segments: A, C, D, F, G
-  0b01111101, // 6 -> Segments: A, C, D, E, F, G
-  0b00000111, // 7 -> Segments: A, B, C
-  0b01111111, // 8 -> Segments: A, B, C, D, E, F, G
-  0b01101111  // 9 -> Segments: A, B, C, D, F, G
+  0b00111111, // 0
+  0b00000110, // 1
+  0b01011011, // 2
+  0b01001111, // 3
+  0b01100110, // 4
+  0b01101101, // 5
+  0b01111101, // 6
+  0b00000111, // 7
+  0b01111111, // 8
+  0b01101111  // 9
 };
+const uint8_t UPSIDE_DOWN_PATTERNS[NUM_DIGITS] = {
+  0b00111111, // 0
+  0b00110000, // 1
+  0b01011011, // 2
+  0b01111001, // 3
+  0b01110100, // 4
+  0b01101101, // 5
+  0b01101111, // 6
+  0b00111000, // 7
+  0b01111111, // 8
+  0b01111101  // 9
+};
+
 
 uint8_t brightness = 4; // 1, 2, 4, 8, 16
 uint8_t i = 0;
@@ -52,23 +65,24 @@ void updateDisplay() {
   if ((uint16_t) (nowMillis - prevUpdateMillis) >= 1000) {
     prevUpdateMillis = nowMillis;
     
-    uint8_t d0 = PATTERNS[0];
+    uint8_t d0 = PATTERNS[i];
     ledModule.setPatternAt(0, d0);
 
-    uint8_t d1 = PATTERNS[0];
+    uint8_t d1 = PATTERNS[i];
     if (dot) {
       d1 |= 0b10000000;
     }  
     ledModule.setPatternAt(1, d1);
 
-    uint8_t d2 = PATTERNS[0];
+    uint8_t d2 = UPSIDE_DOWN_PATTERNS[i];
     if (dot) {
       d2 |= 0b10000000;
     }
     ledModule.setPatternAt(2, d2);
 
-    ledModule.setPatternAt(3, PATTERNS[i++]);
+    ledModule.setPatternAt(3, PATTERNS[i]);
 
+    i++;
     if (i >= 10) {
       i = 0;
     }
